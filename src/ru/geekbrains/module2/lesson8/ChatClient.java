@@ -12,7 +12,6 @@ public class ChatClient {
 
     public ChatClient(Controller controller) {
         this.controller = controller;
-        openConnection();
     }
 
     public void openConnection() {
@@ -20,37 +19,18 @@ public class ChatClient {
             socket = new Socket("localhost", 8189);
             dataInputStream = new DataInputStream(socket.getInputStream());
             dataOutputStream = new DataOutputStream(socket.getOutputStream());
-            new Thread(() -> {
-                while (true) {
-                    final String authMessage;
-                    try {
-                        authMessage = dataInputStream.readUTF();
-                        if (authMessage.startsWith("/AuthOk")) {
-                            final String[] split = authMessage.split(" ");
-                            final String nick = split[1];
-                            controller.addMessage("Успешная авторизация под ником " + nick);
-                            controller.setAuth(true);
-                            break;
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                while (true) {
-                    try {
-                        final String incomingMessage = dataInputStream.readUTF();
-                        if ("/end".equals(incomingMessage)) {
-                            closeConnection();
-                            controller.setAuth(false);
-                            break;
-                        }
-                        controller.addMessage(incomingMessage);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }).start();
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void run() {
+        try {
+            openConnection();
+            new Thread(() -> {
+                readMessage();
+            }).start();
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -60,6 +40,45 @@ public class ChatClient {
             dataOutputStream.writeUTF(messageToSend);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void readMessage() {
+        try {
+            while (true) {
+                final String message = dataInputStream.readUTF();
+                System.out.println(message);
+                if (message.equals("/end")) {
+                    chatWindowClose();
+                    break;
+                }
+                if (message.startsWith("/Auth")) {
+                    authenticateHandle(message);
+                } else {
+                    controller.addMessage(message);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection();
+        }
+    }
+
+    private void chatWindowClose() {
+        controller.setAuth(false);
+        controller.setTempAuth(false);
+    }
+
+    private void authenticateHandle(String message) {
+        final String[] strings = message.split(" ");
+        if (message.startsWith("/AuthTemp")) {
+            controller.setTempAuth(true);
+            controller.addMessage("Успешная временная аутентификация под ником " + strings[1]);
+        } else {
+            controller.setTempAuth(false);
+            controller.setAuth(true);
+            controller.addMessage("Успешная аутентификация под ником " + strings[1]);
         }
     }
 

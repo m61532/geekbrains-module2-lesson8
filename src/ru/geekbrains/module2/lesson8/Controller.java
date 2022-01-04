@@ -19,6 +19,12 @@ public class Controller {
     public PasswordField passwordField;
     @FXML
     public HBox loginBox;
+    public Button tempAuth;
+    private boolean connectionEstablished;
+
+    public Controller() {
+        client = new ChatClient(this);
+    }
 
     public void sendMessage(ActionEvent actionEvent) {
         Object source = (Button) actionEvent.getSource();
@@ -41,12 +47,12 @@ public class Controller {
     }
 
     public void bthAuthClick(ActionEvent actionEvent) {
-        client = new ChatClient(this);
+        if (!connectionEstablished) client.run();
         client.sendMessage("/auth " + loginField.getText() + " " + passwordField.getText());
     }
 
     public void bthTempAuthClick(ActionEvent actionEvent) {
-        client = new ChatClient(this);
+        client.run();
         client.sendMessage("/authTemp");
     }
 
@@ -54,6 +60,16 @@ public class Controller {
         loginBox.setVisible(!success);
         chatTextField.setVisible(success);
         chatTextArea.setVisible(success);
+        if (connectionEstablished) chatTextArea.clear();
+        chatTextFieldWithButtons.setVisible(success);
+    }
+
+    public void setTempAuth(boolean success) {
+        connectionEstablished = success;
+        tempAuth.setVisible(!success);
+        chatTextField.setVisible(success);
+        chatTextArea.setVisible(success);
+        chatTextArea.clear();
         chatTextFieldWithButtons.setVisible(success);
     }
 }

@@ -9,8 +9,8 @@
     <HBox fx:id="loginBox" VBox.vgrow="ALWAYS">
         <TextField fx:id="loginField" promptText="Login"/>
         <PasswordField fx:id="passwordField" promptText="Password"/>
-        <Button fx:id="Auth" defaultButton="true" onAction="#bthAuthClick" minWidth="50">Ok</Button>
-        <Button fx:id="TempAuth" onAction="#bthTempAuthClick" minWidth="100">TempCnct</Button>
+        <Button fx:id="auth" defaultButton="true" onAction="#bthAuthClick" minWidth="50">Ok</Button>
+        <Button fx:id="tempAuth" onAction="#bthTempAuthClick" minWidth="100">TempCnct</Button>
     </HBox>
     <TextArea fx:id="chatTextArea" VBox.vgrow="ALWAYS" editable="false" visible="false"></TextArea>
     <HBox fx:id="chatTextFieldWithButtons" minHeight="20" minWidth="100" alignment="BOTTOM_RIGHT" visible="false">
